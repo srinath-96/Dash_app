@@ -5,3 +5,4 @@ scikit_learn
 plotly
 statsmodels
 gunicorn
+openpyxl
