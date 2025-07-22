@@ -11,15 +11,15 @@ import statsmodels.api as sm
 
 # Load the datasets for each city
 
-city_a_df = pd.read_excel('/Users/srinathmurali/Desktop/Agoda_Case/dataset.xlsx',sheet_name=0)
+city_a_df = pd.read_excel('dataset.xlsx',sheet_name=0)
 city_a_df['city_id'] = 1
-city_b_df = pd.read_excel('/Users/srinathmurali/Desktop/Agoda_Case/dataset.xlsx',sheet_name=1)
+city_b_df = pd.read_excel('dataset.xlsx',sheet_name=1)
 city_b_df['city_id'] = 2        
-city_c_df = pd.read_excel('/Users/srinathmurali/Desktop/Agoda_Case/dataset.xlsx',sheet_name=2)
+city_c_df = pd.read_excel('dataset.xlsx',sheet_name=2)
 city_c_df['city_id'] = 3
-city_d_df = pd.read_excel('/Users/srinathmurali/Desktop/Agoda_Case/dataset.xlsx',sheet_name=3)
+city_d_df = pd.read_excel('dataset.xlsx',sheet_name=3)
 city_d_df['city_id'] = 4
-city_e_df = pd.read_excel('/Users/srinathmurali/Desktop/Agoda_Case/dataset.xlsx',sheet_name=4)
+city_e_df = pd.read_excel('dataset.xlsx',sheet_name=4)
 city_e_df['city_id'] = 5
 
 city_e_df.rename(columns={'accommodation_type_name': 'accommadation_type_name'},inplace=True)
