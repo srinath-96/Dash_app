@@ -11,15 +11,15 @@ import statsmodels.api as sm
 
 # Load the datasets for each city
 
-city_a_df = pd.read_excel('dataset.xlsx',sheet_name=0)
+city_a_df = pd.read_excel('/Users/srinathmurali/Desktop/Agoda_Case/dataset.xlsx',sheet_name=0)
 city_a_df['city_id'] = 1
-city_b_df = pd.read_excel('dataset.xlsx',sheet_name=1)
+city_b_df = pd.read_excel('/Users/srinathmurali/Desktop/Agoda_Case/dataset.xlsx',sheet_name=1)
 city_b_df['city_id'] = 2        
-city_c_df = pd.read_excel('dataset.xlsx',sheet_name=2)
+city_c_df = pd.read_excel('/Users/srinathmurali/Desktop/Agoda_Case/dataset.xlsx',sheet_name=2)
 city_c_df['city_id'] = 3
-city_d_df = pd.read_excel('dataset.xlsx',sheet_name=3)
+city_d_df = pd.read_excel('/Users/srinathmurali/Desktop/Agoda_Case/dataset.xlsx',sheet_name=3)
 city_d_df['city_id'] = 4
-city_e_df = pd.read_excel('dataset.xlsx',sheet_name=4)
+city_e_df = pd.read_excel('/Users/srinathmurali/Desktop/Agoda_Case/dataset.xlsx',sheet_name=4)
 city_e_df['city_id'] = 5
 
 city_e_df.rename(columns={'accommodation_type_name': 'accommadation_type_name'},inplace=True)
@@ -193,7 +193,7 @@ app.layout = html.Div(
 
         # --- Main Graph ---
         html.Div(
-            style={'display': 'grid', 'gridTemplateColumns': '1.5fr 2.5fr', 'gap': '0px', 'marginBottom': '0px', 'backgroundColor': '#111'},
+            style={'display': 'grid', 'gridTemplateColumns': '1fr 2fr 1fr', 'gap': '10px', 'marginBottom': '0px', 'backgroundColor': '#111'},
             children=[
                 html.Div([
                     html.Div(id='kpi-trend', style={'backgroundColor': '#222', 'padding': '16px', 'borderRadius': '8px', 'boxShadow': '0 2px 4px rgba(0,0,0,0.5)', 'color': '#fff', 'fontWeight': 'bold', 'fontSize': '1.3em', 'marginBottom': '12px', 'textAlign': 'center'}),
@@ -204,7 +204,10 @@ app.layout = html.Div(
                     id="loading-icon",
                     type="circle",
                     children=dcc.Graph(id='price-trend-scatter-plot', style={'height': '400px', 'backgroundColor': '#111'})
-                )
+                ),
+                html.Div([
+                    dcc.Graph(id='accommodation-pie-chart', style={'height': '400px', 'backgroundColor': '#111'})
+                ], style={'backgroundColor': '#222', 'padding': '4px', 'borderRadius': '8px'})
             ]
         ),
 
@@ -498,6 +501,67 @@ def update_adr_by_star(selected_cities, selected_ratings, selected_acc_types, se
     )
     fig.update_xaxes(showgrid=True, gridwidth=1, gridcolor='#333', zerolinecolor='#333', linecolor='#fff', tickfont=dict(color='#fff'), title_font=dict(color='#fff'))
     fig.update_yaxes(showgrid=True, gridwidth=1, gridcolor='#333', zerolinecolor='#333', linecolor='#fff', tickfont=dict(color='#fff'), title_font=dict(color='#fff'))
+    return fig
+
+
+@app.callback(
+    Output('accommodation-pie-chart', 'figure'),
+    [
+        Input('city-filter', 'value'),
+        Input('star-rating-filter', 'value'),
+        Input('accommodation-type-filter', 'value'),
+        Input('chain-hotel-filter', 'value'),
+        Input('days-before-checkin-slider', 'value'),
+        Input('date-range-filter', 'start_date'),
+        Input('date-range-filter', 'end_date')
+    ]
+)
+def update_accommodation_pie(selected_cities, selected_ratings, selected_acc_types, selected_chain_status, days_range, start_date, end_date):
+    filtered_df = all_cities_df.copy()
+    if selected_cities:
+        filtered_df = filtered_df[filtered_df['city_id'].isin(selected_cities)]
+    if selected_ratings:
+        filtered_df = filtered_df[filtered_df['star_rating'].isin(selected_ratings)]
+    if selected_acc_types:
+        filtered_df = filtered_df[filtered_df['accommodation_type_name'].isin(selected_acc_types)]
+    if selected_chain_status:
+        filtered_df = filtered_df[filtered_df['chain_hotel'].isin(selected_chain_status)]
+    if start_date and end_date:
+        filtered_df = filtered_df[(filtered_df['checkin_date'] >= start_date) & (filtered_df['checkout_date'] <= end_date)]
+    filtered_df = filtered_df[(filtered_df['days_before_checkin'] >= days_range[0]) & (filtered_df['days_before_checkin'] <= days_range[1])]
+    
+    # Count accommodation types
+    acc_counts = filtered_df['accommodation_type_name'].value_counts()
+    
+    if acc_counts.empty:
+        fig = px.pie(title='Accommodation Type Distribution')
+        fig.add_annotation(
+            text="No data available for the selected filters.",
+            xref="paper", yref="paper", showarrow=False, font=dict(size=16)
+        )
+        return fig
+    
+    fig = px.pie(
+        values=acc_counts.values,
+        names=acc_counts.index,
+        title='Accommodation Type Distribution',
+        hole=0.3  # Makes it a donut chart for better appearance
+    )
+    
+    fig.update_layout(
+        plot_bgcolor='#111',
+        paper_bgcolor='#111',
+        font=dict(color='#fff'),
+        title_font_size=16,
+        margin=dict(l=40, r=40, t=60, b=40),
+        showlegend=True,
+        legend=dict(
+            font=dict(color='#fff'),
+            bgcolor='#222',
+            bordercolor='#333'
+        )
+    )
+    
     return fig
 
 
